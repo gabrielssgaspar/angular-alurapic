@@ -1,21 +1,22 @@
-angular.module('alurapic').controller('FotoController', function($scope, $http, $routeParams) {
+angular.module('alurapic').controller('FotoController', function($scope, $routeParams, recursoFoto) {
 
 	$scope.foto = {};
 	$scope.mensagem = '';
 
+
 	if ( $routeParams.id ) {
 
-		$http.get('/v1/fotos/' + $routeParams.id)
+		recursoFoto.get({fotoId : $routeParams.id}, function(foto) {
 
-			.success(function(foto){
-				$scope.foto = foto;
-			})
+			$scope.foto = foto;
 
-			.error(function(erro){
-				console.log(erro);
-			})
-		;
+		}, function(erro) {
+			
+			console.log(erro);
+		});
+
 	}
+
 
 	$scope.submeter = function() {
 
@@ -23,30 +24,28 @@ angular.module('alurapic').controller('FotoController', function($scope, $http, 
 
 			if ( $scope.foto._id ) {
 
-				$http.put('v1/fotos/' + $scope.foto._id, $scope.foto)
+				recursoFoto.update({fotoId : $scope.foto._id}, $scope.foto, function() {
 
-					.success(function(){
-						$scope.mensagem = "Foto alterada com sucesso!";
-					})
+					$scope.mensagem = "Foto alterada com sucesso!";
 
-					.error(function(erro){
-						$scope.mensagem = "Não foi possível alterar a foto!";
-					})
-				;
+				}, function(erro) {
+				
+					console.log(erro);
+					$scope.mensagem = "Não foi possível alterar a foto!";
+				});
 
 			} else {
 
-				$http.post('v1/fotos', $scope.foto)
+				recursoFoto.save($scope.foto, function() {
 
-					.success(function(){
-						$scope.mensagem = "Foto incluída com sucesso!";
-						$scope.foto = {};
-					})
+					$scope.foto = {};
+					$scope.mensagem = "Foto incluída com sucesso!";
 
-					.error(function(erro){
-						$scope.mensagem = "Não foi possível incluir a foto!";
-					})
-				;
+				}, function(erro) {
+				
+					console.log(erro);
+					$scope.mensagem = "Não foi possível incluir a foto!";
+				});
 			}
 		}
 	};
